@@ -9,9 +9,12 @@
   "author": "derekkeeler",
   "license": "ISC",
   "dependencies": {
+    "co-body": "^4.0.0",
     "co-monk": "^1.0.0",
     "koa": "^1.0.0",
     "koa-router": "^5.2.3",
+    "lodash": "^3.10.1",
+    "mongodb": "^1.4.39",
     "monk": "^1.0.1"
   },
   "devDependencies": {

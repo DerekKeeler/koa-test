@@ -1,22 +1,28 @@
 'use strict';
 
-const app = require('koa')(),
-  router = require('koa-router')();
-
-router.get('/', function *(next){
-  this.type = 'json';
-  this.status = 200;
-  this.body = {
-    'test': 'This is a test response!'
-  };
-});
+const
+  app = require('koa')(),
+  route = require('./routes/route'),
+  port = process.env.PORT || 3000,
+  env = process.env.NODE_ENV || 'development';
 
 app
-.use(router.routes())
-.use(router.allowedMethods());
+.use(function *(next){
+  try {
+    yield next;
+  } catch (err) {
+    this.type = 'json';
+    this.status = err.status || 500;
+    this.body = {'error': 'Things broke. Oh no!'};
+    // delegating error to the regular applications
+    this.app.emit('error', err, this);
+  }
+})
+.use(route.routes())
+.use(route.allowedMethods());
 
 module.exports = app;
 if (!module.parent){
-  app.listen(3000);
-  console.log('Application is running on http://localhost:3000/');
+  app.listen(port);
+  console.log('Application is running on port', port);
 }
