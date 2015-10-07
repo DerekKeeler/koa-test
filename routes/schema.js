@@ -1,47 +1,26 @@
 'use strict';
 
 const
-  db = require('monk')(require('../config/db')),
-  wrap = require('co-monk'),
+  // db = require('monk')(require('../config/db')),
+  // Investigate using co straight
   router = require('koa-router')(),
   parse = require('co-body'),
   _ = require('lodash'),
-  schemaName = 'test-schema',
-  coDB = wrap(db.get('schema'));
+  schemaName = 'test-schema';
 
-function* getSchema() {
-  for(let schema; typeof schema !== 'object';) {
-    schema = yield coDB.findOne({ name: schemaName });
-
-    // Seed value if non-existant
-    coDB.insert({
-      name: schemaName,
-      data: {}
-    });
-  }
-}
-
-let getS = getSchema(),
-  schema;
-
-for(let i = 0; typeof schema !== 'object' && i < 5; i++) {
-  schema = getS.next().value;
-
-  if(i === 4){
-    console.error('Could not connect to DB');
-  }
-}
+let schema = {
+    name: schemaName,
+    data: {}
+  };
 
 router.get('/', function *(next){
-  console.log(schema);
-
   this.type = 'json';
-  this.body = schema;
+  this.body = schema.data;
 });
 
 router.get('/:key', function *(next){
   this.type = 'json';
-  this.body = schema[this.params.key];
+  this.body = schema.data[this.params.key];
 });
 
 router.post('/', function *(next){
@@ -49,7 +28,7 @@ router.post('/', function *(next){
   // Need to validate this based on predefined types
 
   schema.data = data;
-  this.body = schema;
+  this.body = schema.data;
 });
 
 router.put('/:key', function *(next){
@@ -57,7 +36,7 @@ router.put('/:key', function *(next){
     data = yield parse(this),
     key = this.params.key;
 
-  schema[key] = data;
+  schema.data[key] = data;
   this.body = schema;
 });
 
@@ -66,13 +45,13 @@ router.patch('/:key', function *(next){
     data = yield parse(this),
     key = this.params.key;
 
-  _.assign(schema[key], data);
-  this.body = schema;
+  _.assign(schema.data[key], data);
+  this.body = schema.data;
 });
 
 router.del('/:key', function *(next){
-  delete schema[this.params.key];
-  this.body = schema;
+  delete schema.data[this.params.key];
+  this.body = schema.data;
 });
 
 module.exports = {
