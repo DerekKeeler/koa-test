@@ -22,7 +22,7 @@ app
 .use(route.allowedMethods());
 
 module.exports = app;
-if (!module.parent){
+if(!module.parent) {
   app.listen(port);
   console.log('Application is running on port', port);
 }
